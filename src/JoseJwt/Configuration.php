@@ -3,6 +3,8 @@
 namespace JoseJwt;
 
 use JoseJwt\Json\JsonMapper;
+use JoseJwt\Jwe\JweAlgorithm;
+use JoseJwt\Jwe\JweEncryption;
 use JoseJwt\Jws\JwsAlgorithm;
 
 class Configuration
@@ -14,6 +16,16 @@ class Configuration
      * @var JwsAlgorithm[]
      */
     private $hashAlgorithms = [];
+
+    /**
+     * @var JweAlgorithm[]
+     */
+    private $jweAlgorithms = [];
+
+    /**
+     * @var JweEncryption[]
+     */
+    private $jweEncryptions = [];
 
     /**
      * @return JsonMapper|null
@@ -72,6 +84,52 @@ class Configuration
     public function addHashAlgorithm($id, JwsAlgorithm $algorithm)
     {
         $this->hashAlgorithms[$id] = $algorithm;
+
+        return $this;
+    }
+
+    /**
+     * @param string $id
+     *
+     * @return JweAlgorithm|null
+     */
+    public function getJweAlgorithm($id)
+    {
+        return $this->jweAlgorithms[$id];
+    }
+
+    /**
+     * @param string       $id
+     * @param JweAlgorithm $algorithm
+     *
+     * @return Configuration
+     */
+    public function addJweAlgorithm($id, JweAlgorithm $algorithm)
+    {
+        $this->jweAlgorithms[$id] = $algorithm;
+
+        return $this;
+    }
+
+    /**
+     * @param string $id
+     *
+     * @return JweEncryption|null
+     */
+    public function getJweEncryption($id)
+    {
+        return @$this->jweEncryptions[$id];
+    }
+
+    /**
+     * @param string        $id
+     * @param JweEncryption $encryption
+     *
+     * @return Configuration
+     */
+    public function addJweEncryption($id, JweEncryption $encryption)
+    {
+        $this->jweEncryptions[$id] = $encryption;
 
         return $this;
     }

@@ -9,6 +9,10 @@ use JoseJwt\Util\UrlSafeB64Encoder;
 
 class Jwt
 {
+    private function __construct()
+    {
+    }
+
     /**
      * @param Configuration   $configuration
      * @param array|object    $payload
@@ -54,13 +58,13 @@ class Jwt
      */
     public static function decode(Configuration $configuration, $token, $key)
     {
-        if (null === $token || trim($token) === '') {
+        if (empty($token) || trim($token) === '') {
             throw new JoseJwtException('Incoming token expected to be in compact serialization form, but is empty');
         }
 
         $parts = explode('.', $token);
-        if (count($parts) != 3) {
-            throw new JoseJwtException('Invalid JWT');
+        if (count($parts) == 5) {
+            return Jwe::decode($configuration, $token, $key);
         }
 
         $decodedParts = [];
@@ -72,24 +76,19 @@ class Jwt
             throw new JoseJwtException('Invalid header');
         }
 
-        if (count($parts) == 5) {
-            // encrypted JWT
-            throw new \LogicException('Not implemented');
-        } else {
-            // signed or plain JWT
-            $signedInput = $parts[0].'.'.$parts[1];
-            $algorithmId = $header['alg'];
-            $algorithm = $configuration->getHashAlgorithm($algorithmId);
-            if (null === $algorithm) {
-                throw new JoseJwtException(sprintf('Invalid algorithm "%s"', $algorithmId));
-            }
-
-            if (false === $algorithm->verify($decodedParts[2], $signedInput, $key)) {
-                throw new IntegrityException('Invalid signature');
-            }
-
-            return json_decode($decodedParts[1], true);
+        // signed or plain JWT
+        $signedInput = $parts[0].'.'.$parts[1];
+        $algorithmId = $header['alg'];
+        $algorithm = $configuration->getHashAlgorithm($algorithmId);
+        if (null === $algorithm) {
+            throw new JoseJwtException(sprintf('Invalid algorithm "%s"', $algorithmId));
         }
+
+        if (false === $algorithm->verify($decodedParts[2], $signedInput, $key)) {
+            throw new IntegrityException('Invalid signature');
+        }
+
+        return json_decode($decodedParts[1], true);
     }
 
     /**

@@ -45,8 +45,8 @@ class StringUtils
     }
 
     /**
-     * @param array|object $payload
-     * @param JsonMapper   $mapper
+     * @param string|array|object $payload
+     * @param JsonMapper          $mapper
      *
      * @return string
      */
@@ -54,6 +54,12 @@ class StringUtils
     {
         if (is_array($payload)) {
             return json_encode($payload, JSON_UNESCAPED_SLASHES);
+        } elseif (is_string($payload)) {
+            if (trim($payload) !== '') {
+                return $payload;
+            } else {
+                throw new JoseJwtException('Payload can not be empty');
+            }
         } elseif (is_object($payload) && $payload instanceof \JsonSerializable) {
             return json_encode($payload, JSON_UNESCAPED_SLASHES);
         } elseif (is_object($payload) && $mapper) {
