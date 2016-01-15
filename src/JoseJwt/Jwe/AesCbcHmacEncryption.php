@@ -5,6 +5,7 @@ namespace JoseJwt\Jwe;
 use JoseJwt\Error\IntegrityException;
 use JoseJwt\Error\JoseJwtException;
 use JoseJwt\Jws\JwsAlgorithm;
+use JoseJwt\Random\RandomGenerator;
 use JoseJwt\Util\StringUtils;
 
 class AesCbcHmacEncryption implements JweEncryption
@@ -15,14 +16,19 @@ class AesCbcHmacEncryption implements JweEncryption
     /** @var int */
     private $keySize;
 
+    /** @var RandomGenerator */
+    private $randomGenerator;
+
     /**
-     * @param int          $keySize
-     * @param JwsAlgorithm $hashAlgorithm
+     * @param int             $keySize
+     * @param JwsAlgorithm    $hashAlgorithm
+     * @param RandomGenerator $randomGenerator
      */
-    public function __construct($keySize, JwsAlgorithm $hashAlgorithm)
+    public function __construct($keySize, JwsAlgorithm $hashAlgorithm, RandomGenerator $randomGenerator)
     {
         $this->keySize = $keySize;
         $this->hashAlgorithm = $hashAlgorithm;
+        $this->randomGenerator = $randomGenerator;
     }
 
     /**
@@ -53,9 +59,9 @@ class AesCbcHmacEncryption implements JweEncryption
         $hmacKey = substr($cek, 0, $cekLen/2);
         $aesKey = substr($cek, $cekLen/2, $cekLen/2);
 
-        $method = sprintf('AES-%d-CBC', $this->keySize);
+        $method = sprintf('AES-%d-CBC', $this->keySize/2);
         $ivLen = openssl_cipher_iv_length($method);
-        $iv = openssl_random_pseudo_bytes($ivLen);
+        $iv = $this->randomGenerator->get($ivLen);
         $cipherText = openssl_encrypt($plainText, $method, $aesKey, true, $iv);
 
         $authTag = $this->computeAuthTag($aad, $iv, $cipherText, $hmacKey);
@@ -75,22 +81,22 @@ class AesCbcHmacEncryption implements JweEncryption
     public function decrypt($aad, $cek, $iv, $cipherText, $authTag)
     {
         $cekLen = strlen($cek);
-        if ($cekLen != $this->keySize * 8) {
-            throw new JoseJwtException(sprintf('AES-CBC with HMAC algorithm expected key of size %s bits, but was given %s bits', $this->keySize, $cekLen)*8);
+        if ($cekLen *8  != $this->keySize) {
+            throw new JoseJwtException(sprintf('AES-CBC with HMAC algorithm expected key of size %s bits, but was given %s bits', $this->keySize, $cekLen*8));
         }
         if ($cekLen % 2 != 0) {
             throw new JoseJwtException('AES-CBC with HMAC algorithm expected key of even number size');
         }
 
         $hmacKey = substr($cek, 0, $cekLen/2);
-        $aesKey = substr($cek, $cek/2);
+        $aesKey = substr($cek, $cekLen/2);
 
         $expectedAuthTag = $this->computeAuthTag($aad, $iv, $cipherText, $hmacKey);
         if (false === StringUtils::equals($expectedAuthTag, $authTag)) {
             throw new IntegrityException('Authentication tag does not match');
         }
 
-        $method = sprintf('AES-%d-CBC', $this->keySize);
+        $method = sprintf('AES-%d-CBC', $this->keySize/2);
         $plainText = openssl_decrypt($cipherText, $method, $aesKey, true, $iv);
 
         return $plainText;
@@ -115,11 +121,8 @@ class AesCbcHmacEncryption implements JweEncryption
             pack('N2', ($aadLen / $max32bit) * 8, ($aadLen % $max32bit) * 8)
         ]);
         $authTag = $this->hashAlgorithm->sign($hmacInput, $hmacKey);
-
-        //        $authTag = substr(
-        //            hash_hmac('sha' . $sha_size, $hmacInput, $hmacKey, true),
-        //            0, $sha_size / 2 / 8
-        //        );
+        $authTagLen = strlen($authTag);
+        $authTag = substr($authTag, 0, $authTagLen/2);
 
         return $authTag;
     }

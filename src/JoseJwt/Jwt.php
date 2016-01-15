@@ -2,6 +2,7 @@
 
 namespace JoseJwt;
 
+use JoseJwt\Context\Context;
 use JoseJwt\Error\IntegrityException;
 use JoseJwt\Error\JoseJwtException;
 use JoseJwt\Util\StringUtils;
@@ -14,7 +15,7 @@ class Jwt
     }
 
     /**
-     * @param Configuration   $configuration
+     * @param Context         $context
      * @param array|object    $payload
      * @param string|resource $key
      * @param string          $jwsAlgorithm
@@ -22,21 +23,21 @@ class Jwt
      *
      * @return string
      */
-    public static function encode(Configuration $configuration, $payload, $key, $jwsAlgorithm, $extraHeaders = [])
+    public static function encode(Context $context, $payload, $key, $jwsAlgorithm, $extraHeaders = [])
     {
         $header = array_merge([
             'alg' => '',
             'typ' => 'JWT',
         ], $extraHeaders);
 
-        $hashAlgorithm = $configuration->getHashAlgorithm($jwsAlgorithm);
+        $hashAlgorithm = $context->jwsAlgorithms()->get($jwsAlgorithm);
         if (null == $hashAlgorithm) {
             throw new JoseJwtException(sprintf('Unknown algorithm "%s"', $jwsAlgorithm));
         }
 
         $header['alg'] = $jwsAlgorithm;
 
-        $payloadString = StringUtils::payload2string($payload, $configuration->getJsonMapper());
+        $payloadString = StringUtils::payload2string($payload, $context->jsonMapper());
 
         $signingInput = implode('.', [
             UrlSafeB64Encoder::encode(json_encode($header)),
@@ -50,13 +51,13 @@ class Jwt
     }
 
     /**
-     * @param Configuration   $configuration
+     * @param Context         $context
      * @param string          $token
      * @param string|resource $key
      *
      * @return array
      */
-    public static function decode(Configuration $configuration, $token, $key)
+    public static function decode(Context $context, $token, $key)
     {
         if (empty($token) || trim($token) === '') {
             throw new JoseJwtException('Incoming token expected to be in compact serialization form, but is empty');
@@ -64,7 +65,7 @@ class Jwt
 
         $parts = explode('.', $token);
         if (count($parts) == 5) {
-            return Jwe::decode($configuration, $token, $key);
+            return Jwe::decode($context, $token, $key);
         }
 
         $decodedParts = [];
@@ -79,7 +80,7 @@ class Jwt
         // signed or plain JWT
         $signedInput = $parts[0].'.'.$parts[1];
         $algorithmId = $header['alg'];
-        $algorithm = $configuration->getHashAlgorithm($algorithmId);
+        $algorithm = $context->jwsAlgorithms()->get($algorithmId);
         if (null === $algorithm) {
             throw new JoseJwtException(sprintf('Invalid algorithm "%s"', $algorithmId));
         }

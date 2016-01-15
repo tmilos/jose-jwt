@@ -3,6 +3,7 @@
 namespace JoseJwt\Jwe;
 
 use JoseJwt\Error\JoseJwtException;
+use JoseJwt\Random\RandomGenerator;
 
 class AesKeyWrapAlgorithm implements JweAlgorithm
 {
@@ -15,15 +16,20 @@ class AesKeyWrapAlgorithm implements JweAlgorithm
     /** @var array */
     private static $wrapperMap = [
         128 => 'AESKW\A128KW',
-        192 => 'use AESKW\A192KW',
-        256 => 'use AESKW\A256KW',
+        192 => 'AESKW\A192KW',
+        256 => 'AESKW\A256KW',
     ];
 
+    /** @var RandomGenerator */
+    private $randomGenerator;
+
     /**
-     * @param int $keySize
+     * @param int             $keySize
+     * @param RandomGenerator $randomGenerator
      */
-    public function __construct($keySize)
+    public function __construct($keySize, RandomGenerator $randomGenerator)
     {
+        $this->randomGenerator = $randomGenerator;
         $this->kekLengthBits = $keySize;
         if (false === array_key_exists($keySize, self::$wrapperMap)) {
             throw new JoseJwtException(sprintf('Invalid kek key size "%s"', $keySize));
@@ -49,7 +55,7 @@ class AesKeyWrapAlgorithm implements JweAlgorithm
             throw new JoseJwtException('CekSizeBits must be divisible by 8');
         }
 
-        $cek = openssl_random_pseudo_bytes($cekSizeBits/8);
+        $cek = $this->randomGenerator->get($cekSizeBits/8);
 
         $encryptedCek = $this->aesWrap($kek, $cek);
 

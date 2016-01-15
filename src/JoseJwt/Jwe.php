@@ -2,6 +2,7 @@
 
 namespace JoseJwt;
 
+use JoseJwt\Context\Context;
 use JoseJwt\Error\JoseJwtException;
 use JoseJwt\Util\StringUtils;
 use JoseJwt\Util\UrlSafeB64Encoder;
@@ -12,16 +13,26 @@ class Jwe
     {
     }
 
-    public static function encode(Configuration $configuration, $payload, $key, $jweAlgorithm, $jweEncryption, array $extraHeaders = [])
+    /**
+     * @param Context $context
+     * @param         $payload
+     * @param         $key
+     * @param         $jweAlgorithm
+     * @param         $jweEncryption
+     * @param array   $extraHeaders
+     *
+     * @return string
+     */
+    public static function encode(Context $context, $payload, $key, $jweAlgorithm, $jweEncryption, array $extraHeaders = [])
     {
         if (empty($payload) || (is_string($payload) && trim($payload) == '')) {
             throw new JoseJwtException('Payload can not be empty');
         }
-        $algorithm = $configuration->getJweAlgorithm($jweAlgorithm);
+        $algorithm = $context->jweAlgorithms()->get($jweAlgorithm);
         if (null === $algorithm) {
             throw new JoseJwtException(sprintf('Invalid or unsupported algorithm "%s"', $jweAlgorithm));
         }
-        $encryption = $configuration->getJweEncryption($jweEncryption);
+        $encryption = $context->jweEncryptions()->get($jweEncryption);
         if (null === $encryption) {
             throw new JoseJwtException(sprintf('Invalid or unsupported encryption "%s"', $jweEncryption));
         }
@@ -34,7 +45,7 @@ class Jwe
 
         list($cek, $encryptedCek) = $algorithm->wrapNewKey($encryption->getKeySize(), $key, $header);
 
-        $payloadString = StringUtils::payload2string($payload, $configuration->getJsonMapper());
+        $payloadString = StringUtils::payload2string($payload, $context->jsonMapper());
 
         $headerString = json_encode($header);
         $aad = UrlSafeB64Encoder::encode($headerString);
@@ -50,13 +61,13 @@ class Jwe
     }
 
     /**
-     * @param Configuration   $configuration
+     * @param Context         $context
      * @param string          $token
      * @param string|resource $key
      *
      * @return string
      */
-    public static function decode(Configuration $configuration, $token, $key)
+    public static function decode(Context $context, $token, $key)
     {
         if (empty($token) || trim($token) === '') {
             throw new JoseJwtException('Incoming token expected to be in compact serialization form, but is empty');
@@ -80,8 +91,8 @@ class Jwe
 
         $header = json_decode($headerString, true);
 
-        $algorithm = $configuration->getJweAlgorithm($header['alg']);
-        $encryption = $configuration->getJweEncryption($header['enc']);
+        $algorithm = $context->jweAlgorithms()->get($header['alg']);
+        $encryption = $context->jweEncryptions()->get($header['enc']);
 
         $cek = $algorithm->unwrap($encryptedCek, $key, $encryption->getKeySize(), $header);
         $aad = $parts[0];

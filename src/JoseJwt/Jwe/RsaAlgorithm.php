@@ -3,18 +3,24 @@
 namespace JoseJwt\Jwe;
 
 use JoseJwt\Error\JoseJwtException;
+use JoseJwt\Random\RandomGenerator;
 
 class RsaAlgorithm implements JweAlgorithm
 {
     /** @var int */
     private $padding;
 
+    /** @var RandomGenerator */
+    private $randomGenerator;
+
     /**
-     * @param int $padding
+     * @param int             $padding
+     * @param RandomGenerator $randomGenerator
      */
-    public function __construct($padding)
+    public function __construct($padding, RandomGenerator $randomGenerator)
     {
         $this->padding = $padding;
+        $this->randomGenerator = $randomGenerator;
     }
 
     /**
@@ -26,12 +32,12 @@ class RsaAlgorithm implements JweAlgorithm
      */
     public function wrapNewKey($cekSizeBits, $kek, array $header)
     {
-        $cek = openssl_random_pseudo_bytes(128);
+        $cek = $this->randomGenerator->get($cekSizeBits/8);
         if (false == openssl_public_encrypt($cek, $cekEncrypted, $kek, $this->padding)) {
             throw new JoseJwtException('Unable to encrypt CEK');
         }
 
-        return $cekEncrypted;
+        return [$cek, $cekEncrypted];
     }
 
     /**
