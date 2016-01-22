@@ -11,7 +11,6 @@ interface JwsAlgorithm
     const RS256 = 'RS256';
     const RS384 = 'RS384';
     const RS512 = 'RS512';
-    const ES256 = 'ES256';
 
     /**
      * @param string $securedInput
