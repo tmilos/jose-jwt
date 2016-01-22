@@ -6,15 +6,11 @@ use JoseJwt\Json\JsonMapper;
 use JoseJwt\Jwe\JweAlgorithmCollection;
 use JoseJwt\Jwe\JweEncryptionCollection;
 use JoseJwt\Jws\JwsAlgorithmCollection;
-use JoseJwt\Random\RandomGenerator;
 
 class DefaultContext implements Context
 {
     /** @var JsonMapper|null */
     private $jsonMapper;
-
-    /** @var RandomGenerator */
-    private $randomGenerator;
 
     /** @var JwsAlgorithmCollection */
     private $jwsAlgorithms;
@@ -26,11 +22,9 @@ class DefaultContext implements Context
     private $jweEncryptions;
 
     /**
-     * @param RandomGenerator $randomGenerator
      */
-    public function __construct(RandomGenerator $randomGenerator)
+    public function __construct()
     {
-        $this->randomGenerator = $randomGenerator;
         $this->jwsAlgorithms = new JwsAlgorithmCollection();
         $this->jweAlgorithms = new JweAlgorithmCollection();
         $this->jweEncryptions = new JweEncryptionCollection();
@@ -42,14 +36,6 @@ class DefaultContext implements Context
     public function jsonMapper()
     {
         return $this->jsonMapper;
-    }
-
-    /**
-     * @return RandomGenerator
-     */
-    public function randomGenerator()
-    {
-        return $this->randomGenerator();
     }
 
     /**
@@ -74,14 +60,6 @@ class DefaultContext implements Context
     public function jweEncryptions()
     {
         return $this->jweEncryptions;
-    }
-
-    /**
-     * @return JsonMapper|null
-     */
-    public function getJsonMapper()
-    {
-        return $this->jsonMapper;
     }
 
     /**

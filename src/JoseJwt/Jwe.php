@@ -90,6 +90,9 @@ class Jwe
         $authTag = $decodedParts[4];
 
         $header = json_decode($headerString, true);
+        if (null === $header) {
+            throw new JoseJwtException('Invalid header');
+        }
 
         $algorithm = $context->jweAlgorithms()->get($header['alg']);
         $encryption = $context->jweEncryptions()->get($header['enc']);

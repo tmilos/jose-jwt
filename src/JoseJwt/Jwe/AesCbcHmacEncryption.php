@@ -53,7 +53,7 @@ class AesCbcHmacEncryption implements JweEncryption
             throw new JoseJwtException(sprintf('AES-CBC with HMAC algorithm expected key of size %s bits, but was given %s bits', $this->keySize, $cekLen*8));
         }
         if ($cekLen % 2 != 0) {
-            throw new JoseJwtException('AES-CBC with HMAC algorithm expected key of even number size');
+            throw new JoseJwtException('AES-CBC with HMAC encryption expected key of even number size');
         }
 
         $hmacKey = StringUtils::substring($cek, 0, $cekLen/2);
@@ -85,7 +85,7 @@ class AesCbcHmacEncryption implements JweEncryption
             throw new JoseJwtException(sprintf('AES-CBC with HMAC algorithm expected key of size %s bits, but was given %s bits', $this->keySize, $cekLen*8));
         }
         if ($cekLen % 2 != 0) {
-            throw new JoseJwtException('AES-CBC with HMAC algorithm expected key of even number size');
+            throw new JoseJwtException('AES-CBC with HMAC encryption expected key of even number size');
         }
 
         $hmacKey = StringUtils::substring($cek, 0, $cekLen/2);

@@ -104,7 +104,7 @@ class Jwt
         }
 
         $parts = explode('.', $token);
-        if (count($parts) != 3) {
+        if (count($parts) != 3 && count($parts) != 5) {
             throw new JoseJwtException('Invalid JWT');
         }
 

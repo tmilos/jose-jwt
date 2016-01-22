@@ -4,6 +4,7 @@ namespace JoseJwt\Tests;
 
 use JoseJwt\Jws\JwsAlgorithm;
 use JoseJwt\Jwt;
+use JoseJwt\Util\UrlSafeB64Encoder;
 
 class JwtTest extends AbstractTestBase
 {
@@ -100,5 +101,131 @@ class JwtTest extends AbstractTestBase
     {
         $payload = JWT::payload($token);
         $this->assertEquals($this->payload, $payload);
+    }
+
+    /**
+     * @expectedException \JoseJwt\Error\JoseJwtException
+     * @expectedExceptionMessage Unknown algorithm "foo_algo"
+     */
+    public function test_encode_throws_on_unknown_algorithm()
+    {
+        JWT::encode($this->context, 'payload', 'key', 'foo_algo');
+    }
+
+    public function empty_token_provider()
+    {
+        return [
+            [''],
+            [' '],
+            ['       '],
+            [null],
+        ];
+    }
+
+    /**
+     * @dataProvider empty_token_provider
+     *
+     * @expectedException \JoseJwt\Error\JoseJwtException
+     * @expectedExceptionMessage Incoming token expected to be in compact serialization form, but is empty
+     */
+    public function test_decode_throws_on_empty_token($token)
+    {
+        JWT::decode($this->context, $token, 'key');
+    }
+
+    /**
+     * @expectedException \JoseJwt\Error\JoseJwtException
+     * @expectedExceptionMessage Invalid header
+     */
+    public function test_decode_throws_on_invalid_header()
+    {
+        JWT::decode($this->context, 'aaaa.bbbb.ccc', 'key');
+    }
+
+    /**
+     * @expectedException \JoseJwt\Error\JoseJwtException
+     * @expectedExceptionMessage Invalid algorithm "foo_algo"
+     */
+    public function test_decode_throws_on_invalid_algorithm()
+    {
+        $header = ['alg'=>'foo_algo'];
+        $headerEncoded = UrlSafeB64Encoder::encode(json_encode($header));
+
+        JWT::decode($this->context, $headerEncoded.'.bbbb.ccc', 'key');
+    }
+
+    /**
+     * @expectedException \JoseJwt\Error\JoseJwtException
+     * @expectedExceptionMessage Invalid signature
+     */
+    public function test_decode_throws_integrity_exception()
+    {
+        $headerEncoded = UrlSafeB64Encoder::encode(json_encode(['alg'=>JwsAlgorithm::HS256]));
+        JWT::decode($this->context, $headerEncoded.'.bbb.ccc', 'key');
+    }
+
+    /**
+     * @dataProvider empty_token_provider
+     *
+     * @expectedException \JoseJwt\Error\JoseJwtException
+     * @expectedExceptionMessage Incoming token expected to be in compact serialization form, but is empty
+     */
+    public function test_header_throws_on_empty_token($token)
+    {
+        JWT::header($token);
+    }
+
+    public function invalid_jwt_token_provider()
+    {
+        return [
+            ['aaaaa'],
+            ['aaaaa.bbbbb'],
+            ['aaaaa.bbbbb.ccc.ddd'],
+            ['aaaaa.bbbbb.ccc.ddd.eee.ffff'],
+        ];
+    }
+
+    /**
+     * @dataProvider invalid_jwt_token_provider
+     *
+     * @expectedException \JoseJwt\Error\JoseJwtException
+     * @expectedExceptionMessage Invalid JWT
+     */
+    public function test_header_throws_on_invalid_jwt_token($token)
+    {
+        JWT::header($token);
+    }
+
+    /**
+     * @dataProvider invalid_jwt_token_provider
+     *
+     * @expectedException \JoseJwt\Error\JoseJwtException
+     * @expectedExceptionMessage Invalid header
+     */
+    public function test_header_throws_on_invalid_header()
+    {
+        JWT::header('aaa.bbb.ccc');
+    }
+
+    /**
+     * @dataProvider empty_token_provider
+     *
+     * @expectedException \JoseJwt\Error\JoseJwtException
+     * @expectedExceptionMessage Incoming token expected to be in compact serialization form, but is empty
+     */
+    public function test_payload_throws_on_empty_token($token)
+    {
+        JWT::payload($token);
+    }
+
+    /**
+     * @dataProvider invalid_jwt_token_provider
+     *
+     * @expectedException \JoseJwt\Error\JoseJwtException
+     * @expectedExceptionMessage Invalid JWT
+     */
+    public function test_payload_throws_on_invalid_jwt_token($token)
+    {
+        JWT::payload($token);
     }
 }

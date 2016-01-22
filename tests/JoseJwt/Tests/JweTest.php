@@ -85,4 +85,85 @@ class JweTest extends AbstractTestBase
         $payload = json_decode($payload, true);
         $this->assertEquals($this->payload, $payload);
     }
+
+    public function empty_payload_provider()
+    {
+        return [
+            [''],
+            [' '],
+            ['       '],
+            [null],
+        ];
+    }
+
+    /**
+     * @dataProvider empty_payload_provider
+     *
+     * @expectedException \JoseJwt\Error\JoseJwtException
+     * @expectedExceptionMessage Payload can not be empty
+     */
+    public function test_encode_throws_on_empty_payload($payload)
+    {
+        JWE::encode($this->context, $payload, 'key', Jwe\JweAlgorithm::DIR, Jwe\JweEncryption::A128CBC_HS256);
+    }
+
+    /**
+     * @expectedException \JoseJwt\Error\JoseJwtException
+     * @expectedExceptionMessage Invalid or unsupported algorithm "foo_algo"
+     */
+    public function test_encode_throws_on_unknown_algorithm()
+    {
+        JWE::encode($this->context, 'payload', 'key', 'foo_algo', Jwe\JweEncryption::A128CBC_HS256);
+    }
+
+    /**
+     * @expectedException \JoseJwt\Error\JoseJwtException
+     * @expectedExceptionMessage Invalid or unsupported encryption "foo_enc"
+     */
+    public function test_encode_throws_on_unknown_encryption()
+    {
+        JWE::encode($this->context, 'payload', 'key', Jwe\JweAlgorithm::DIR, 'foo_enc');
+    }
+
+    /**
+     * @dataProvider empty_payload_provider
+     *
+     * @expectedException \JoseJwt\Error\JoseJwtException
+     * @expectedExceptionMessage Incoming token expected to be in compact serialization form, but is empty
+     */
+    public function test_decode_throws_on_empty_token($token)
+    {
+        JWE::decode($this->context, $token, 'key');
+    }
+
+    public function invalid_jwe_token_provider()
+    {
+        return [
+            ['aaaa'],
+            ['aaaa.bbbb'],
+            ['aaaa.bbbb.cc'],
+            ['aaaa.bbbb.cc.dddd'],
+            ['aaaa.bbbb.cc.dddd.eee.fff'],
+        ];
+    }
+
+    /**
+     * @dataProvider invalid_jwe_token_provider
+     *
+     * @expectedException \JoseJwt\Error\JoseJwtException
+     * @expectedExceptionMessage Invalid JWE token
+     */
+    public function test_decode_throws_on_invalid_jwe_token($token)
+    {
+        JWE::decode($this->context, $token, 'key');
+    }
+
+    /**
+     * @expectedException \JoseJwt\Error\JoseJwtException
+     * @expectedExceptionMessage Invalid header
+     */
+    public function test_decode_throws_on_invalid_header()
+    {
+        JWE::decode($this->context, 'aaa.bbb.ccc.ddd.eee', 'key');
+    }
 }

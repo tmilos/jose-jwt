@@ -100,7 +100,7 @@ class StringUtils
     {
         if (is_array($payload)) {
             return json_encode($payload, JSON_UNESCAPED_SLASHES);
-        } elseif (is_string($payload)) {
+        } elseif (is_string($payload) || null === $payload) {
             if (trim($payload) !== '') {
                 return $payload;
             } else {

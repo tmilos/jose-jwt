@@ -16,11 +16,6 @@ interface Context
     public function jsonMapper();
 
     /**
-     * @return RandomGenerator
-     */
-    public function randomGenerator();
-
-    /**
      * @return JwsAlgorithmCollection
      */
     public function jwsAlgorithms();

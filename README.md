@@ -7,7 +7,7 @@ Javascript Object Signing and Encryption JOSE PHP library, supporting JSON Web T
 [![HHVM Status](http://hhvm.h4cc.de/badge/tmilos/jose-jwt.svg)](http://hhvm.h4cc.de/package/tmilos/jose-jwt)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/tmilos/jose-jwt/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/tmilos/jose-jwt/?branch=master)
 
-## JWT
+## JWT algorithms
 
 Supported signing algorithms
 
@@ -22,7 +22,7 @@ Supported signing algorithms
 | RS512            |
 
 
-## JWE
+## JWE algorithms and encryptions
 
 Supported JWE algorithms
 
@@ -44,3 +44,99 @@ Supported JWE encryption
 | A192CBC-HS384    |
 | A256CBC-HS512    |
 
+
+## JWT API
+
+```php
+$factory = new \JoseJwt\Context\DefaultContextFactory();
+$context = $factory->get();
+
+$payload = ['msg' => 'Hello!'];
+$extraHeader = ['iam'=>'my-id'];
+
+// plain (no signature) token
+$token = \JoseJwt\JWT::encode($context, $payload, null, \JoseJwt\Jws\JwsAlgorithm::NONE, $extraHeader);
+
+// HS256 signature
+$secret = '...'; // 256 bits secret
+$token = \JoseJwt\JWT::encode($context, $payload, $secret, \JoseJwt\Jws\JwsAlgorithm::HS256, $extraHeader);
+
+// HS384 signature
+$secret = '...'; // 256 bits secret
+$token = \JoseJwt\JWT::encode($context, $payload, $secret, \JoseJwt\Jws\JwsAlgorithm::HS384, $extraHeader);
+
+// HS512 signature
+$secret = '...'; // 256 bits secret
+$token = \JoseJwt\JWT::encode($context, $payload, $secret, \JoseJwt\Jws\JwsAlgorithm::HS512, $extraHeader);
+
+// RS256
+$privateKey = openssl_get_privatekey($filename);
+$token = \JoseJwt\JWT::encode($context, $payload, $secret, \JoseJwt\Jws\JwsAlgorithm::RS256, $extraHeader);
+
+// RS384
+$privateKey = openssl_get_privatekey($filename);
+$token = \JoseJwt\JWT::encode($context, $payload, $secret, \JoseJwt\Jws\JwsAlgorithm::RS384, $extraHeader);
+
+// RS512
+$privateKey = openssl_get_privatekey($filename);
+$token = \JoseJwt\JWT::encode($context, $payload, $secret, \JoseJwt\Jws\JwsAlgorithm::RS512, $extraHeader);
+
+// decode
+$header = \JoseJwt\JWT::header($token);
+// eventually use other header data to indicate which key should be used
+switch($header['alg']) {
+    case \JoseJwt\Jws\JwsAlgorithm::NONE:
+        $key = null;
+        break;
+    case \JoseJwt\Jws\JwsAlgorithm::HS256:
+    case \JoseJwt\Jws\JwsAlgorithm::HS384:
+    case \JoseJwt\Jws\JwsAlgorithm::HS512:
+        $key = $secret;
+        break;
+    case \JoseJwt\Jws\JwsAlgorithm::RS256:
+    case \JoseJwt\Jws\JwsAlgorithm::RS384:
+    case \JoseJwt\Jws\JwsAlgorithm::RS512:
+        $key = $secret;
+        break;
+}
+$payload = \JoseJwt\JWT::decode($context, $token, $key);
+```
+
+## JWE API
+
+```php
+$factory = new \JoseJwt\Context\DefaultContextFactory();
+$context = $factory->get();
+
+// Symmetric
+$payload = ['msg' => 'Hello!'];
+$extraHeader = ['iam'=>'my-id'];
+
+// DIR - A128CBC-HS256
+$secret = '...'; // 256 bits secret
+$token = \JoseJwt\JWE::encode($context, $payload, $secret, \JoseJwt\Jwe\JweAlgorithm::DIR, \JoseJwt\Jwe\JweEncryption::A128CBC_HS256, $extraHeaders);
+
+// DIR - A192CBC-HS384
+$secret = '...'; // 384 bits secret
+$token = \JoseJwt\JWE::encode($context, $payload, $secret, \JoseJwt\Jwe\JweAlgorithm::DIR, \JoseJwt\Jwe\JweEncryption::A192CBC_HS384, $extraHeaders);
+
+// DIR - A256CBC-HS512
+$secret = '...'; // 512 bits secret
+$token = \JoseJwt\JWE::encode($context, $payload, $secret, \JoseJwt\Jwe\JweAlgorithm::DIR, \JoseJwt\Jwe\JweEncryption::A256CBC_HS512, $extraHeaders);
+
+// decode
+$payload = \JoseJwt\JWE::decode($context, $token, $secret);
+
+// RSA
+$myPrivateKey = openssl_get_privatekey();
+$partyPublicKey = openssl_get_publickey();
+
+// RSA_OAEP - A128CBC-HS256
+$token = \JoseJwt\JWE::encode($context, $payload, $partyPublicKey, \JoseJwt\Jwe\JweAlgorithm::RSA_OAEP, \JoseJwt\Jwe\JweEncryption::A128CBC_HS256, $extraHeaders);
+
+// RSA_OAEP - A256CBC-HS512
+$token = \JoseJwt\JWE::encode($context, $payload, $partyPublicKey, \JoseJwt\Jwe\JweAlgorithm::RSA_OAEP, \JoseJwt\Jwe\JweEncryption::A256CBC_HS512, $extraHeaders);
+
+// decode
+$payload = \JoseJwt\JWE::decode($context, $token, $myPrivateKey);
+```
