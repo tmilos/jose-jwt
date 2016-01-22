@@ -4,6 +4,7 @@ namespace JoseJwt\Jwe;
 
 use JoseJwt\Error\JoseJwtException;
 use JoseJwt\Random\RandomGenerator;
+use JoseJwt\Util\StringUtils;
 
 class AesKeyWrapAlgorithm implements JweAlgorithm
 {
@@ -47,7 +48,7 @@ class AesKeyWrapAlgorithm implements JweAlgorithm
      */
     public function wrapNewKey($cekSizeBits, $kek, array $header)
     {
-        $kekLen = strlen($kek);
+        $kekLen = StringUtils::length($kek);
         if ($kekLen * 8 != $this->kekLengthBits) {
             throw new JoseJwtException(sprintf('AesKeyWrap management algorithm expected key of size %s bits, but was given %s bits', $this->kekLengthBits, $kekLen*8));
         }
@@ -72,7 +73,7 @@ class AesKeyWrapAlgorithm implements JweAlgorithm
      */
     public function unwrap($encryptedCek, $kek, $cekSizeBits, array $header)
     {
-        $kekLen = strlen($kek);
+        $kekLen = StringUtils::length($kek);
         if ($kekLen * 8 != $this->kekLengthBits) {
             throw new JoseJwtException(sprintf('AesKeyWrap management algorithm expected key of size %s bits, but was given %s bits', $this->kekLengthBits, $kekLen*8));
         }

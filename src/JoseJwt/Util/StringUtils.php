@@ -24,9 +24,13 @@ class StringUtils
      */
     public static function equals($knownString, $userInput)
     {
+        static $exists = null;
+        if (null === $exists) {
+            $exists = function_exists('hash_equals');
+        }
         $knownString = (string) $knownString;
         $userInput = (string) $userInput;
-        if (function_exists('hash_equals')) {
+        if ($exists) {
             return hash_equals($knownString, $userInput);
         }
         $knownLen = strlen($knownString);
@@ -42,6 +46,48 @@ class StringUtils
         }
         // They are only identical strings if $result is exactly 0...
         return 0 === $result;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return int
+     */
+    public static function length($value)
+    {
+        static $exists = null;
+        if (null === $exists) {
+            $exists = function_exists('mb_strlen');
+        }
+
+        if ($exists) {
+            return mb_strlen($value, '8bit');
+        }
+
+        return strlen($value);
+    }
+
+    /**
+     * @param string $value
+     * @param int    $start
+     * @param int    $length
+     *
+     * @return string
+     */
+    public static function substring($value, $start = 0, $length = null)
+    {
+        static $exists = null;
+        if (null === $exists) {
+            $exists = function_exists('mb_substr');
+        }
+
+        if ($exists) {
+            return mb_substr($value, $start, $length, '8bit');
+        } elseif ($length !== null) {
+            return substr($value, $start, $length);
+        }
+
+        return substr($value, $start);
     }
 
     /**

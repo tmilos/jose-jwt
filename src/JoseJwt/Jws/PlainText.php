@@ -3,6 +3,7 @@
 namespace JoseJwt\Jws;
 
 use JoseJwt\Error\JoseJwtException;
+use JoseJwt\Util\StringUtils;
 
 class PlainText implements JwsAlgorithm
 {
@@ -30,6 +31,6 @@ class PlainText implements JwsAlgorithm
             throw new JoseJwtException('Plaintext alg expects key to be null');
         }
 
-        return strlen($signature) === 0;
+        return StringUtils::length($signature) === 0;
     }
 }

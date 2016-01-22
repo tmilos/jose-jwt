@@ -48,7 +48,7 @@ class AesCbcHmacEncryption implements JweEncryption
      */
     public function encrypt($aad, $plainText, $cek)
     {
-        $cekLen = strlen($cek);
+        $cekLen = StringUtils::length($cek);
         if ($cekLen * 8 != $this->keySize) {
             throw new JoseJwtException(sprintf('AES-CBC with HMAC algorithm expected key of size %s bits, but was given %s bits', $this->keySize, $cekLen*8));
         }
@@ -56,8 +56,8 @@ class AesCbcHmacEncryption implements JweEncryption
             throw new JoseJwtException('AES-CBC with HMAC algorithm expected key of even number size');
         }
 
-        $hmacKey = substr($cek, 0, $cekLen/2);
-        $aesKey = substr($cek, $cekLen/2, $cekLen/2);
+        $hmacKey = StringUtils::substring($cek, 0, $cekLen/2);
+        $aesKey = StringUtils::substring($cek, $cekLen/2, $cekLen/2);
 
         $method = sprintf('AES-%d-CBC', $this->keySize/2);
         $ivLen = openssl_cipher_iv_length($method);
@@ -80,7 +80,7 @@ class AesCbcHmacEncryption implements JweEncryption
      */
     public function decrypt($aad, $cek, $iv, $cipherText, $authTag)
     {
-        $cekLen = strlen($cek);
+        $cekLen = StringUtils::length($cek);
         if ($cekLen *8  != $this->keySize) {
             throw new JoseJwtException(sprintf('AES-CBC with HMAC algorithm expected key of size %s bits, but was given %s bits', $this->keySize, $cekLen*8));
         }
@@ -88,8 +88,8 @@ class AesCbcHmacEncryption implements JweEncryption
             throw new JoseJwtException('AES-CBC with HMAC algorithm expected key of even number size');
         }
 
-        $hmacKey = substr($cek, 0, $cekLen/2);
-        $aesKey = substr($cek, $cekLen/2);
+        $hmacKey = StringUtils::substring($cek, 0, $cekLen/2);
+        $aesKey = StringUtils::substring($cek, $cekLen/2);
 
         $expectedAuthTag = $this->computeAuthTag($aad, $iv, $cipherText, $hmacKey);
         if (false === StringUtils::equals($expectedAuthTag, $authTag)) {
@@ -112,7 +112,7 @@ class AesCbcHmacEncryption implements JweEncryption
      */
     private function computeAuthTag($aad, $iv, $cipherText, $hmacKey)
     {
-        $aadLen = strlen($aad);
+        $aadLen = StringUtils::length($aad);
         $max32bit = 2147483647;
         $hmacInput = implode('', [
             $aad,
@@ -121,8 +121,8 @@ class AesCbcHmacEncryption implements JweEncryption
             pack('N2', ($aadLen / $max32bit) * 8, ($aadLen % $max32bit) * 8)
         ]);
         $authTag = $this->hashAlgorithm->sign($hmacInput, $hmacKey);
-        $authTagLen = strlen($authTag);
-        $authTag = substr($authTag, 0, $authTagLen/2);
+        $authTagLen = StringUtils::length($authTag);
+        $authTag = StringUtils::substring($authTag, 0, $authTagLen/2);
 
         return $authTag;
     }
