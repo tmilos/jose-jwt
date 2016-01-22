@@ -1,12 +1,14 @@
 {
     "name": "tmilos/jose-jwt",
     "description": "Javascript Object Signing and Encryption JOSE PHP library, supporting JSON Web Tokens JWT and JSON Web Encryption JWE",
+    "keywords": ["JOSE", "JWT", "JWS", "JWE", "JWA", "Javascript Object Signing and Encryption", "JSON Web Tokens", "JSON Web Encryption"],
     "type": "library",
     "license": "MIT",
     "authors": [
         {
             "name": "Milos Tomic",
-            "email": "tmilos@gmail.com"
+            "email": "tmilos@gmail.com",
+            "homepage": "http://github.com/tmilos"
         }
     ],
     "autoload": {
