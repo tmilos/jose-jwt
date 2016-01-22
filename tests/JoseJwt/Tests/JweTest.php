@@ -30,13 +30,17 @@ class JweTest extends AbstractTestBase
     /**
      * @dataProvider symmetric_provider
      */
-    public function _test_symmetric($tokenName, $secretSize, $algorithm, $encryption, array $randomSequences)
+    public function test_symmetric($tokenName, $secretSize, $algorithm, $encryption, array $randomSequences)
     {
         foreach ($randomSequences as $randomSequence) {
             $this->addRandomSequence($randomSequence);
         }
-        $token = Jwe::encode($this->context, $this->payload, $this->getSecret($secretSize), $algorithm, $encryption, $this->extraHeader);
+        $token = Jwe::encode($this->context, $this->payload, $key = $this->getSecret($secretSize), $algorithm, $encryption, $this->extraHeader);
         $this->assertEquals($this->tokens[$tokenName], $token);
+
+        $decrypted = Jwe::decode($this->context, $token, $key);
+        $payload = json_decode($decrypted, true);
+        $this->assertEquals($this->payload, $payload);
     }
 
     public function rsa_provider()

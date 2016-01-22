@@ -25,7 +25,7 @@ class HmacUsingSha implements JwsAlgorithm
      */
     public function sign($securedInput, $key)
     {
-        if (null == $key || trim($key) === '') {
+        if (null === $key || trim($key) === '') {
             throw new JoseJwtException('Hmac key can not be empty');
         }
 

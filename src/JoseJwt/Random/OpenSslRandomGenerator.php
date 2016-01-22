@@ -2,6 +2,8 @@
 
 namespace JoseJwt\Random;
 
+use JoseJwt\Error\JoseJwtException;
+
 class OpenSslRandomGenerator implements RandomGenerator
 {
     /**
@@ -11,6 +13,11 @@ class OpenSslRandomGenerator implements RandomGenerator
      */
     public function get($bytesLength)
     {
-        return openssl_random_pseudo_bytes($bytesLength);
+        $result = openssl_random_pseudo_bytes($bytesLength, $strong);
+        if (false === $result || false === $strong) {
+            throw new JoseJwtException('Unable to generate strong random sequence');
+        }
+
+        return $result;
     }
 }

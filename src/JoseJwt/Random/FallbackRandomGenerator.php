@@ -2,6 +2,8 @@
 
 namespace JoseJwt\Random;
 
+use JoseJwt\Error\JoseJwtException;
+
 class FallbackRandomGenerator implements RandomGenerator
 {
     /** @var RandomGenerator|null */
@@ -73,6 +75,6 @@ class FallbackRandomGenerator implements RandomGenerator
             return $this->second->get($bytesLength);
         }
 
-        throw new \RuntimeException('No random generators provided');
+        throw new JoseJwtException('No random generators provided');
     }
 }

@@ -28,7 +28,7 @@ class PlainText implements JwsAlgorithm
     public function verify($signature, $securedInput, $key)
     {
         if (null != $key) {
-            throw new JoseJwtException('Plaintext alg expects key to be null');
+            throw new JoseJwtException('Plaintext algorithm expects key to be null');
         }
 
         return StringUtils::length($signature) === 0;
