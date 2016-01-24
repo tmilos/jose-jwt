@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the jose-jwt package.
+ *
+ * (c) Milos Tomic <tmilos@gmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace JoseJwt\Jwe;
 
 use JoseJwt\Error\JoseJwtException;
@@ -32,7 +41,7 @@ class RsaAlgorithm implements JweAlgorithm
      */
     public function wrapNewKey($cekSizeBits, $kek, array $header)
     {
-        $cek = $this->randomGenerator->get($cekSizeBits/8);
+        $cek = $this->randomGenerator->get($cekSizeBits / 8);
         if (false == openssl_public_encrypt($cek, $cekEncrypted, $kek, $this->padding)) {
             throw new JoseJwtException('Unable to encrypt CEK');
         }

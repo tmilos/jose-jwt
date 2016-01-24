@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the jose-jwt package.
+ *
+ * (c) Milos Tomic <tmilos@gmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace JoseJwt\Util;
 
 use JoseJwt\Error\JoseJwtException;
@@ -20,7 +29,7 @@ class StringUtils
      * @param string $knownString The string of known length to compare against
      * @param string $userInput   The string that the user can control
      *
-     * @return bool    true if the two strings are the same, false otherwise
+     * @return bool true if the two strings are the same, false otherwise
      */
     public static function equals($knownString, $userInput)
     {
@@ -41,7 +50,7 @@ class StringUtils
         $result = $knownLen - $userLen;
         // Note that we ALWAYS iterate over the user-supplied length
         // This is to mitigate leaking length information
-        for ($i = 0; $i < $userLen; $i++) {
+        for ($i = 0; $i < $userLen; ++$i) {
             $result |= (ord($knownString[$i]) ^ ord($userInput[$i]));
         }
         // They are only identical strings if $result is exactly 0...

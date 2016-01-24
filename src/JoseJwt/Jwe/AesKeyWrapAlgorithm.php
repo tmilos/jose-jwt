@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the jose-jwt package.
+ *
+ * (c) Milos Tomic <tmilos@gmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace JoseJwt\Jwe;
 
 use JoseJwt\Error\JoseJwtException;
@@ -50,13 +59,13 @@ class AesKeyWrapAlgorithm implements JweAlgorithm
     {
         $kekLen = StringUtils::length($kek);
         if ($kekLen * 8 != $this->kekLengthBits) {
-            throw new JoseJwtException(sprintf('AesKeyWrap management algorithm expected key of size %s bits, but was given %s bits', $this->kekLengthBits, $kekLen*8));
+            throw new JoseJwtException(sprintf('AesKeyWrap management algorithm expected key of size %s bits, but was given %s bits', $this->kekLengthBits, $kekLen * 8));
         }
         if ($cekSizeBits % 8 != 0) {
             throw new JoseJwtException('CekSizeBits must be divisible by 8');
         }
 
-        $cek = $this->randomGenerator->get($cekSizeBits/8);
+        $cek = $this->randomGenerator->get($cekSizeBits / 8);
 
         $encryptedCek = $this->aesWrap($kek, $cek);
 
@@ -75,7 +84,7 @@ class AesKeyWrapAlgorithm implements JweAlgorithm
     {
         $kekLen = StringUtils::length($kek);
         if ($kekLen * 8 != $this->kekLengthBits) {
-            throw new JoseJwtException(sprintf('AesKeyWrap management algorithm expected key of size %s bits, but was given %s bits', $this->kekLengthBits, $kekLen*8));
+            throw new JoseJwtException(sprintf('AesKeyWrap management algorithm expected key of size %s bits, but was given %s bits', $this->kekLengthBits, $kekLen * 8));
         }
 
         return $this->aesUnwrap($kek, $encryptedCek);
