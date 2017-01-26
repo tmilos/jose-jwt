@@ -1,11 +1,11 @@
 <?php
 
-$finder = Symfony\CS\Finder\DefaultFinder::create()
+$finder = PhpCsFixer\Finder::create()
     ->in('src')
 ;
 
 $header = <<<EOT
-This file is part of the jose-jwt package.
+This file is part of the tmilos/jose-jwt package.
 
 (c) Milos Tomic <tmilos@gmail.com>
 
@@ -13,11 +13,14 @@ This source file is subject to the MIT license that is bundled
 with this source code in the file LICENSE.
 EOT;
 
-Symfony\CS\Fixer\Contrib\HeaderCommentFixer::setHeader($header);
-
-return Symfony\CS\Config\Config::create()
+return PhpCsFixer\Config::create()
+    ->setRules(array(
+        '@Symfony' => true,
+        'simplified_null_return' => false,
+        'phpdoc_no_empty_return' => false,
+        'no_mixed_echo_print' => ['use' => 'print'],
+        'header_comment' => ['header' => $header],
+    ))
     ->setUsingCache(false)
-    ->level(Symfony\CS\FixerInterface::SYMFONY_LEVEL)
-    ->fixers(array('-empty_return', '-phpdoc_no_empty_return', 'header_comment'))
-    ->finder($finder)
+    ->setFinder($finder)
 ;
