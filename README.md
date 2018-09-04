@@ -56,47 +56,47 @@ $payload = ['msg' => 'Hello!'];
 $extraHeader = ['iam'=>'my-id'];
 
 // plain (no signature) token
-$token = \Tmilos\JoseJwt\JWT::encode($context, $payload, null, \JoseJwt\Jws\JwsAlgorithm::NONE, $extraHeader);
+$token = \Tmilos\JoseJwt\Jwt::encode($context, $payload, null, \Tmilos\JoseJwt\Jws\JwsAlgorithm::NONE, $extraHeader);
 
 // HS256 signature
 $secret = '...'; // 256 bits secret
-$token = \Tmilos\JoseJwt\JWT::encode($context, $payload, $secret, \JoseJwt\Jws\JwsAlgorithm::HS256, $extraHeader);
+$token = \Tmilos\JoseJwt\Jwt::encode($context, $payload, $secret, \Tmilos\JoseJwt\Jws\JwsAlgorithm::HS256, $extraHeader);
 
 // HS384 signature
 $secret = '...'; // 256 bits secret
-$token = \Tmilos\JoseJwt\JWT::encode($context, $payload, $secret, \JoseJwt\Jws\JwsAlgorithm::HS384, $extraHeader);
+$token = \Tmilos\JoseJwt\Jwt::encode($context, $payload, $secret, \Tmilos\JoseJwt\Jws\JwsAlgorithm::HS384, $extraHeader);
 
 // HS512 signature
 $secret = '...'; // 256 bits secret
-$token = \Tmilos\JoseJwt\JWT::encode($context, $payload, $secret, \JoseJwt\Jws\JwsAlgorithm::HS512, $extraHeader);
+$token = \Tmilos\JoseJwt\Jwt::encode($context, $payload, $secret, \Tmilos\JoseJwt\Jws\JwsAlgorithm::HS512, $extraHeader);
 
 // RS256
 $privateKey = openssl_get_privatekey($filename);
-$token = \Tmilos\JoseJwt\JWT::encode($context, $payload, $secret, \JoseJwt\Jws\JwsAlgorithm::RS256, $extraHeader);
+$token = \Tmilos\JoseJwt\Jwt::encode($context, $payload, $secret, \Tmilos\JoseJwt\Jws\JwsAlgorithm::RS256, $extraHeader);
 
 // RS384
 $privateKey = openssl_get_privatekey($filename);
-$token = \Tmilos\JoseJwt\JWT::encode($context, $payload, $secret, \JoseJwt\Jws\JwsAlgorithm::RS384, $extraHeader);
+$token = \Tmilos\JoseJwt\Jwt::encode($context, $payload, $secret, \Tmilos\JoseJwt\Jws\JwsAlgorithm::RS384, $extraHeader);
 
 // RS512
 $privateKey = openssl_get_privatekey($filename);
-$token = \Tmilos\JoseJwt\JWT::encode($context, $payload, $secret, \JoseJwt\Jws\JwsAlgorithm::RS512, $extraHeader);
+$token = \Tmilos\JoseJwt\Jwt::encode($context, $payload, $secret, \Tmilos\JoseJwt\Jws\JwsAlgorithm::RS512, $extraHeader);
 
 // decode
-$header = \Tmilos\JoseJwt\JWT::header($token);
+$header = \Tmilos\JoseJwt\Jwt::header($token);
 // eventually also use other header data to indicate which key should be used
 switch($header['alg']) {
-    case \JoseJwt\Jws\JwsAlgorithm::NONE:
+    case \Tmilos\JoseJwt\Jws\JwsAlgorithm::NONE:
         $key = null;
         break;
-    case \JoseJwt\Jws\JwsAlgorithm::HS256:
-    case \JoseJwt\Jws\JwsAlgorithm::HS384:
-    case \JoseJwt\Jws\JwsAlgorithm::HS512:
+    case \Tmilos\JoseJwt\Jws\JwsAlgorithm::HS256:
+    case \Tmilos\JoseJwt\Jws\JwsAlgorithm::HS384:
+    case \Tmilos\JoseJwt\Jws\JwsAlgorithm::HS512:
         $key = $secret;
         break;
-    case \JoseJwt\Jws\JwsAlgorithm::RS256:
-    case \JoseJwt\Jws\JwsAlgorithm::RS384:
-    case \JoseJwt\Jws\JwsAlgorithm::RS512:
+    case \Tmilos\JoseJwt\Jws\JwsAlgorithm::RS256:
+    case \Tmilos\JoseJwt\Jws\JwsAlgorithm::RS384:
+    case \Tmilos\JoseJwt\Jws\JwsAlgorithm::RS512:
         $key = $publicKey;
         break;
 }
@@ -115,32 +115,32 @@ $extraHeader = ['iam'=>'my-id'];
 
 // DIR - A128CBC-HS256
 $secret = '...'; // 256 bits secret
-$token = \Tmilos\JoseJwt\JWE::encode($context, $payload, $secret, \JoseJwt\Jwe\JweAlgorithm::DIR, \JoseJwt\Jwe\JweEncryption::A128CBC_HS256, $extraHeaders);
+$token = \Tmilos\JoseJwt\Jwe::encode($context, $payload, $secret, \Tmilos\JoseJwt\Jwe\JweAlgorithm::DIR, \Tmilos\JoseJwt\Jwe\JweEncryption::A128CBC_HS256, $extraHeaders);
 
 // DIR - A192CBC-HS384
 $secret = '...'; // 384 bits secret
-$token = \Tmilos\JoseJwt\JWE::encode($context, $payload, $secret, \JoseJwt\Jwe\JweAlgorithm::DIR, \JoseJwt\Jwe\JweEncryption::A192CBC_HS384, $extraHeaders);
+$token = \Tmilos\JoseJwt\Jwe::encode($context, $payload, $secret, \Tmilos\JoseJwt\Jwe\JweAlgorithm::DIR, \Tmilos\JoseJwt\Jwe\JweEncryption::A192CBC_HS384, $extraHeaders);
 
 // DIR - A256CBC-HS512
 $secret = '...'; // 512 bits secret
-$token = \Tmilos\JoseJwt\JWE::encode($context, $payload, $secret, \JoseJwt\Jwe\JweAlgorithm::DIR, \JoseJwt\Jwe\JweEncryption::A256CBC_HS512, $extraHeaders);
+$token = \Tmilos\JoseJwt\Jwe::encode($context, $payload, $secret, \Tmilos\JoseJwt\Jwe\JweAlgorithm::DIR, \Tmilos\JoseJwt\Jwe\JweEncryption::A256CBC_HS512, $extraHeaders);
 
 // decode
-$payload = \Tmilos\JoseJwt\JWE::decode($context, $token, $secret);
+$payload = \Tmilos\JoseJwt\Jwe::decode($context, $token, $secret);
 
 // RSA
 $myPrivateKey = openssl_get_privatekey();
 $partyPublicKey = openssl_get_publickey();
 
 // RSA_OAEP - A128CBC-HS256
-$token = \Tmilos\JoseJwt\JWE::encode($context, $payload, $partyPublicKey, \JoseJwt\Jwe\JweAlgorithm::RSA_OAEP, \JoseJwt\Jwe\JweEncryption::A128CBC_HS256, $extraHeaders);
+$token = \Tmilos\JoseJwt\Jwe::encode($context, $payload, $partyPublicKey, \Tmilos\JoseJwt\Jwe\JweAlgorithm::RSA_OAEP, \Tmilos\JoseJwt\Jwe\JweEncryption::A128CBC_HS256, $extraHeaders);
 
 // RSA_OAEP - A256CBC-HS512
-$token = \Tmilos\JoseJwt\JWE::encode($context, $payload, $partyPublicKey, \JoseJwt\Jwe\JweAlgorithm::RSA_OAEP, \JoseJwt\Jwe\JweEncryption::A256CBC_HS512, $extraHeaders);
+$token = \Tmilos\JoseJwt\Jwe::encode($context, $payload, $partyPublicKey, \Tmilos\JoseJwt\Jwe\JweAlgorithm::RSA_OAEP, \Tmilos\JoseJwt\Jwe\JweEncryption::A256CBC_HS512, $extraHeaders);
 
 // decode
-$payload = \Tmilos\JoseJwt\JWE::decode($context, $token, $myPrivateKey);
+$payload = \Tmilos\JoseJwt\Jwe::decode($context, $token, $myPrivateKey);
 
 // read header w/out decryption
-$header = \Tmilos\JoseJwt\JWE::decode($token); // {"alg": "A192KW", "enc": "A128CBC-HS256", "typ": "JWT", "custom": "X"}
+$header = \Tmilos\Tmilos\JoseJwt\Jwe::decode($token); // {"alg": "A192KW", "enc": "A128CBC-HS256", "typ": "JWT", "custom": "X"}
 ```
